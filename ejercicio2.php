@@ -9,7 +9,7 @@ require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
 // TODO: Gestionar Token CSRF
-if (empty($_SESSION['csrf_token'])) {
+if (empty($_SESSION['csrf_token'])) { 
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error de validacion CSRF: Token invalido o expirado.");
     }
 
-    // TODO: Sanitizar entradas POST
+    // TODO: Sanitizar entradas POST 
     $semilla = htmlspecialchars(trim($_POST['cedula_semilla'] ?? '000'));
     $monto   = filter_var($_POST['monto'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     $tasa    = filter_var($_POST['tasa'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
