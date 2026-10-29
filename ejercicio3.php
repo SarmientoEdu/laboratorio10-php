@@ -6,10 +6,10 @@ require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
 // TODO: Sanitizar entradas recibidas por GET
-$semilla = htmlspecialchars(trim((string)($_GET['cedula_semilla'] ?? '')));
-$monto   = filter_var(trim((string)($_GET['monto'] ?? '')), FILTER_VALIDATE_FLOAT);
-$tasa    = filter_var(trim((string)($_GET['tasa'] ?? '')), FILTER_VALIDATE_FLOAT);
-$plazo   = filter_var(trim((string)($_GET['plazo'] ?? '')), FILTER_VALIDATE_INT);
+$semilla = htmlspecialchars(trim((string)($_GET['cedula_semilla'] ?? '781')));
+$monto   = filter_var(trim((string)($_GET['monto'] ?? '23500')), FILTER_VALIDATE_FLOAT);
+$tasa    = filter_var(trim((string)($_GET['tasa'] ?? '9.5')), FILTER_VALIDATE_FLOAT);
+$plazo   = filter_var(trim((string)($_GET['plazo'] ?? '120')), FILTER_VALIDATE_INT);
 
 if (!preg_match('/^\d{3}$/', $semilla) || $monto === false || $tasa === false || $plazo === false
     || $monto <= 0 || $tasa <= 0 || $plazo <= 0) {
