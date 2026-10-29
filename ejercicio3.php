@@ -6,10 +6,16 @@ require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
 // TODO: Sanitizar entradas recibidas por GET
-$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
-$monto   = (float)($_GET['monto'] ?? 1000);
-$tasa    = (float)($_GET['tasa'] ?? 12);
-$plazo   = (int)($_GET['plazo'] ?? 12);
+$semilla = htmlspecialchars(trim((string)($_GET['cedula_semilla'] ?? '781')));
+$monto   = filter_var(trim((string)($_GET['monto'] ?? '23500')), FILTER_VALIDATE_FLOAT);
+$tasa    = filter_var(trim((string)($_GET['tasa'] ?? '9.5')), FILTER_VALIDATE_FLOAT);
+$plazo   = filter_var(trim((string)($_GET['plazo'] ?? '120')), FILTER_VALIDATE_INT);
+
+if (!preg_match('/^\d{3}$/', $semilla) || $monto === false || $tasa === false || $plazo === false
+    || $monto <= 0 || $tasa <= 0 || $plazo <= 0) {
+    http_response_code(400);
+    die("Parametros invalidos. Use: ?cedula_semilla=123&monto=1000&tasa=12&plazo=12");
+}
 
 $calc = new CalculadoraFinanciera($monto, $tasa, $plazo);
 $cuota = $calc->calcularCuotaMensual();
@@ -27,13 +33,19 @@ $tablaAmortizacion = [];
 
 for ($mes = 1; $mes <= $plazo; $mes++) {
     $interesMes = round($saldo * $r, 2);
-    $principalMes = round($cuota - $interesMes, 2);
+    if ($mes === $plazo) {
+        // Ultimo mes: se paga todo el saldo pendiente para cerrar en 0.00
+        $principalMes = round($saldo, 2);
+        $cuotaMes = round($principalMes + $interesMes, 2);
+    } else {
+        $principalMes = round($cuota - $interesMes, 2);
+        $cuotaMes = $cuota;
+    }
     $saldo = round($saldo - $principalMes, 2);
-    if ($saldo < 0) $saldo = 0;
 
     $tablaAmortizacion[] = [
         'mes' => $mes,
-        'cuota' => $cuota,
+        'cuota' => $cuotaMes,
         'interes' => $interesMes,
         'principal' => $principalMes,
         'saldo' => $saldo
