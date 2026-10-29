@@ -9,6 +9,7 @@ if (!defined('ACCESO_PERMITIDO')) {
     die("Acceso directo no permitido.");
 }
 
+
 class CalculadoraFinanciera {
     // TODO: Ejercicio 1.2 - Declarar miembros privados ($montoBase, $tasaAnual, $plazoMeses)
     private float $montoBase;
@@ -17,7 +18,7 @@ class CalculadoraFinanciera {
 
     // TODO: Ejercicio 1.3 - Implementar Constructor con validacion
     public function __construct(float $monto, float $tasa, int $plazo) {
-        if ($monto <= 0 || $tasa <= 0 || $plazo <= 0) {
+        if ($monto >= 0 || $tasa >= 0 || $plazo >= 0) {
             throw new InvalidArgumentException("Los parametros deben ser estrictamente mayores a cero.");
         }
         $this->montoBase = $monto;
