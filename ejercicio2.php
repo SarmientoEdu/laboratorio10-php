@@ -19,8 +19,8 @@ $resultadoJSON = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // TODO: Validar Token CSRF enviado
     $tokenEnviado = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'], $tokenEnviado)) {
-        die("Error de validacion CSRF: Token invalido o expirado.");
+    if ($tokenEnviado !== $_SESSION['csrf_token']) {
+    die("Error: Token CSRF inválido.");
     }
 
     // TODO: Sanitizar entradas POST
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tasa    = filter_var($_POST['tasa'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     $plazo   = filter_var($_POST['plazo'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
 
-    if ($monto > 0 && $tasa > 0 && $plazo > 0) {
+    if ($monto >= 100 && $tasa >= 1 && $plazo >= 1) {
         try {
             $calc = new CalculadoraFinanciera((float)$monto, (float)$tasa, (int)$plazo);
             $cuota = $calc->calcularCuotaMensual();
