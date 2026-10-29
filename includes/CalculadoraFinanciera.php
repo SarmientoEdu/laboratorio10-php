@@ -36,7 +36,7 @@ class CalculadoraFinanciera {
         $n = $this->plazoMeses;
        
         $cuota = $this->montoBase * ($r * pow(1 + $r, $n)) / (pow(1 + $r, $n) - 1);
-        return round($cuota, 2);
+        return $cuota;
     }
  
     // TODO: Ejercicio 1.5 - Implementar sobrecarga dinamica con __call

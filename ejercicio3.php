@@ -4,6 +4,7 @@
  */
 require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
+<<<<<<< HEAD
 ?ph
 // TODO: Sanitizar entradas recibidas por GET
 $semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
@@ -38,6 +39,42 @@ for ($mes = 1; $mes <= $plazo; $mes++) {
         'principal' => $principalMes,
         'saldo' => $saldo
     ];
+=======
+
+// TODO: Sanitizar entradas recibidas por GET
+$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? ''));
+$monto   = (float)filter_var(trim($_GET['monto'] ?? ''), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+$tasa    = (float)filter_var(trim($_GET['tasa'] ?? ''), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+$plazo   = (int)filter_var(trim($_GET['plazo'] ?? ''), FILTER_SANITIZE_NUMBER_INT);
+
+// Inicializar variables de salida (necesario para CLI sin GET)
+$textoCifrado = '';
+$tabla = '';
+
+if ($monto > 0 && $tasa > 0 && $plazo > 0) {
+    $calc = new CalculadoraFinanciera($monto, $tasa, $plazo);
+    $cuota = $calc->calcularCuotaMensual();
+
+    // TODO: Cifrado Simetrico con OpenSSL (AES-256-CBC)
+    $claveCifrado = hash('sha256', $semilla);
+    $iv = substr(hash('sha256', 'UTP_IV_' . $semilla), 0, 16);
+    $textoPlano = "Monto: {$monto} | Cuota: {$cuota}";
+    $textoCifrado = openssl_encrypt($textoPlano, 'AES-256-CBC', $claveCifrado, 0, $iv);
+
+    // TODO: Generacion de Tabla de Amortizacion con Bucle for
+    $saldo = $monto;
+    $r = ($tasa / 100) / 12;
+    $tabla = '<table border="1" cellpadding="5"><tr><th>Mes</th><th>Interés</th><th>Principal</th><th>Saldo</th></tr>';
+    for ($mes = 1; $mes <= $plazo; $mes++) {
+        $interesMes = $saldo * $r;
+        $principalMes = $cuota - $interesMes;
+        $saldo -= $principalMes;
+        if ($saldo < 0) $saldo = 0;
+
+        $tabla .= "<tr><td>$mes</td><td>$" . number_format($interesMes, 2) . "</td><td>$" . number_format($principalMes, 2) . "</td><td>$" . number_format($saldo, 2) . "</td></tr>";
+    }
+    $tabla .= '</table>';
+>>>>>>> 78769e4ff8a3a491fb688dd65f6ca29f22bde9c7
 }
 ?>
 <!DOCTYPE html>
