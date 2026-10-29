@@ -30,21 +30,22 @@ class CalculadoraFinanciera {
     public function getTasaAnual(): float { return $this->tasaAnual; }
     public function getPlazoMeses(): int { return $this->plazoMeses; }
 
-    // TODO: Ejercicio 1.4 - Implementar calcularCuotaMensual()
-    public function calcularCuotaMensual(): float {
+      // Cuota para un plazo cualquiera (sin redondear)
+    private function cuotaParaPlazo(int $n): float {
         $r = ($this->tasaAnual / 100) / 12;
-        $n = $this->plazoMeses;
-        
-        $cuota = $this->montoBase * ($r * pow(1 + $r, $n)) / (pow(1 + $r, $n) - 1);
-        return round($cuota, 2);
+        $factor = pow(1 + $r, $n);
+        return $this->montoBase * ($r * $factor) / ($factor - 1);
     }
 
-    // TODO: Ejercicio 1.5 - Implementar sobrecarga dinamica con __call
-    public function __call(string $name, array $arguments) {
+    public function calcularCuotaMensual(): float {
+        return round($this->cuotaParaPlazo($this->plazoMeses), 2);
+    }
+
+       public function __call(string $name, array $arguments) {
         if ($name === 'calcularInteresTotal') {
-            $plazoEfectivo = isset($arguments[0]) && is_int($arguments[0]) ? $arguments[0] : $this->plazoMeses;
-            $cuota = $this->calcularCuotaMensual();
-            $totalPagado = $cuota * $plazoEfectivo;
+            $mesesExtra = isset($arguments[0]) ? (int)$arguments[0] : 0;
+            $n = $this->plazoMeses + $mesesExtra;
+            $totalPagado = $this->cuotaParaPlazo($n) * $n;
             return round($totalPagado - $this->montoBase, 2);
         }
 
