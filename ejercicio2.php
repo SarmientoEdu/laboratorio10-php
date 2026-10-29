@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // TODO: Sanitizar entradas POST
-    $semilla = htmlspecialchars(trim($_POST['cedula_semilla'] ?? '000'));
+    $semilla = htmlspecialchars(trim($_POST['cedula_semilla'] ?? ''));
     $monto   = filter_var($_POST['monto'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     $tasa    = filter_var($_POST['tasa'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
     $plazo   = filter_var($_POST['plazo'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-group">
             <label for="tasa">Tasa de Interes Anual (%):</label>
-            <input type="number" id="tasa" name="tasa" step="0.1" required min="1">
+            <input type="number" id="tasa" name="tasa" step="0.01" required min="1">
         </div>
 
         <div class="form-group">
