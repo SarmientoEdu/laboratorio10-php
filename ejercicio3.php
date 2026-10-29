@@ -5,38 +5,52 @@
 require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
-// TODO: Sanitizar entradas recibidas por GET
-$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
-$monto   = (float)($_GET['monto'] ?? 1000);
-$tasa    = (float)($_GET['tasa'] ?? 12);
-$plazo   = (int)($_GET['plazo'] ?? 12);
+// Sanitizar y validar entradas recibidas por GET (sin valores fijos)
+$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? ''));
+$monto   = filter_var(trim($_GET['monto'] ?? ''), FILTER_VALIDATE_FLOAT);
+$tasa    = filter_var(trim($_GET['tasa'] ?? ''), FILTER_VALIDATE_FLOAT);
+$plazo   = filter_var(trim($_GET['plazo'] ?? ''), FILTER_VALIDATE_INT);
 
-$calc = new CalculadoraFinanciera($monto, $tasa, $plazo);
+if ($semilla === '' || $monto === false || $tasa === false || $plazo === false
+    || $monto <= 0 || $tasa <= 0 || $plazo <= 0) {
+    http_response_code(400);
+    exit('Parametros invalidos. Use: ?cedula_semilla=892&monto=5000&tasa=12.5&plazo=12');
+}
+
+$calc  = new CalculadoraFinanciera($monto, $tasa, $plazo);
 $cuota = $calc->calcularCuotaMensual();
 
-// TODO: Cifrado Simetrico con OpenSSL (AES-256-CBC)
+// Cifrado Simetrico con OpenSSL (AES-256-CBC)
 $claveCifrado = hash('sha256', $semilla);
 $iv = substr(hash('sha256', 'UTP_IV_' . $semilla), 0, 16);
 $textoPlano = "Monto: {$monto} | Cuota: {$cuota}";
 $textoCifrado = openssl_encrypt($textoPlano, 'AES-256-CBC', $claveCifrado, 0, $iv);
 
-// TODO: Generacion de Tabla de Amortizacion con Bucle for
+// Tabla de Amortizacion con bucle for
 $saldo = $monto;
-$r = ($tasa / 100) / 12;
+$r = $calc->getTasaMensual();
 $tablaAmortizacion = [];
 
 for ($mes = 1; $mes <= $plazo; $mes++) {
-    $interesMes = round($saldo * $r, 2);
+    $interesMes   = round($saldo * $r, 2);
     $principalMes = round($cuota - $interesMes, 2);
+
+    // Ultimo mes: se paga todo el saldo pendiente para cerrar exactamente en 0
+    if ($mes === $plazo) {
+        $principalMes = round($saldo, 2);
+    }
+
     $saldo = round($saldo - $principalMes, 2);
-    if ($saldo < 0) $saldo = 0;
+    if ($saldo < 0) {
+        $saldo = 0.0;
+    }
 
     $tablaAmortizacion[] = [
-        'mes' => $mes,
-        'cuota' => $cuota,
-        'interes' => $interesMes,
+        'mes'       => $mes,
+        'cuota'     => round($interesMes + $principalMes, 2),
+        'interes'   => $interesMes,
         'principal' => $principalMes,
-        'saldo' => $saldo
+        'saldo'     => $saldo
     ];
 }
 ?>
@@ -59,7 +73,7 @@ for ($mes = 1; $mes <= $plazo; $mes++) {
     <h2>Tabla de Amortizacion (Procesamiento GET)</h2>
     <p><strong>Semilla de Cedula:</strong> <?php echo $semilla; ?></p>
     <p><strong>Resumen Cifrado (AES-256-CBC):</strong></p>
-    <div id="cifrado-resultado" class="cifrado-box"><?php echo $textoCifrado; ?></div>
+    <div id="cifrado-resultado" class="cifrado-box"><?php echo htmlspecialchars($textoCifrado); ?></div>
 
     <table>
         <thead>
@@ -75,10 +89,10 @@ for ($mes = 1; $mes <= $plazo; $mes++) {
             <?php foreach ($tablaAmortizacion as $row): ?>
             <tr>
                 <td><?php echo $row['mes']; ?></td>
-                <td><?php echo number_format($row['cuota'], 2); ?></td>
-                <td><?php echo number_format($row['interes'], 2); ?></td>
-                <td><?php echo number_format($row['principal'], 2); ?></td>
-                <td><?php echo number_format($row['saldo'], 2); ?></td>
+                <td><?php echo number_format($row['cuota'], 2, '.', ''); ?></td>
+                <td><?php echo number_format($row['interes'], 2, '.', ''); ?></td>
+                <td><?php echo number_format($row['principal'], 2, '.', ''); ?></td>
+                <td><?php echo number_format($row['saldo'], 2, '.', ''); ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
