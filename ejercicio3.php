@@ -5,7 +5,7 @@
 require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
-// TODO: Sanitizar entradas recibidas por GET
+// TODO: Sanitizar entradas recibidas por GET 
 $semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
 $monto   = (float)($_GET['monto'] ?? 1000);
 $tasa    = (float)($_GET['tasa'] ?? 12);
@@ -86,3 +86,4 @@ for ($mes = 1; $mes <= $plazo; $mes++) {
 </div>
 </body>
 </html>
+//
