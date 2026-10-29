@@ -1,6 +1,6 @@
 <?php
 /**
- * Ejercicio 3: Procesamiento GET, Tabla de Amortizacion y Cifrado OpenSSL
+ * Ejercicio 3: Procesamiento GET, Tabla de Amortizacion y Cifrado OpenSSL 
  */
 require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
