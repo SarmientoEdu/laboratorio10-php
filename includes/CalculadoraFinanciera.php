@@ -5,8 +5,8 @@
 
 // TODO: Ejercicio 1.1 - Implementar verificacion de constante ACCESO_PERMITIDO
 if (!defined('ACCESO_PERMITIDO')) {
-    http_response_code(403);
-    die("Acceso directo no permitido.");
+    header('HTTP/1.1 403 Forbidden');
+exit('Acceso directo no permitido.');
 }
 
 class CalculadoraFinanciera {
