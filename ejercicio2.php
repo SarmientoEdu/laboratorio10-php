@@ -19,17 +19,61 @@ $resultadoJSON = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // TODO: Validar Token CSRF enviado
     $tokenEnviado = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'], $tokenEnviado)) {
-        die("Error de validacion CSRF: Token invalido o expirado.");
-    }
+    if (
+    !is_string($tokenEnviado) ||
+    !hash_equals($_SESSION['csrf_token'], $tokenEnviado)
+) {
+    http_response_code(403);
+    die("Error de validacion CSRF: Token invalido o expirado.");
+}
 
     // TODO: Sanitizar entradas POST
-    $semilla = htmlspecialchars(trim($_POST['cedula_semilla'] ?? '000'));
-    $monto   = filter_var($_POST['monto'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    $tasa    = filter_var($_POST['tasa'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    $plazo   = filter_var($_POST['plazo'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
+    $semilla = $_POST['cedula_semilla'] ?? '';
+    $monto   = $_POST['monto'] ?? '';
+    $tasa    = $_POST['tasa'] ?? '';
+    $plazo   = $_POST['plazo'] ?? '';
 
-    if ($monto > 0 && $tasa > 0 && $plazo > 0) {
+    // Verificar que los campos sean cadenas
+if (
+    !is_string($semilla) ||
+    !is_string($monto) ||
+    !is_string($tasa) ||
+    !is_string($plazo)
+) {
+    $mensajeError = "Los datos enviados no son validos.";
+} else {
+
+    // Eliminar espacios innecesarios
+    $semilla = trim($semilla);
+    $monto   = trim($monto);
+    $tasa    = trim($tasa);
+    $plazo   = trim($plazo);
+
+    // Validar semilla de tres digitos
+    if (!preg_match('/^[0-9]{3}$/', $semilla)) {
+        $mensajeError = "La semilla debe contener exactamente 3 digitos.";
+    }
+
+ // Validar los numeros sin alterar su significado
+    $monto = filter_var($monto, FILTER_VALIDATE_FLOAT);
+    $tasa  = filter_var($tasa, FILTER_VALIDATE_FLOAT);
+    $plazo = filter_var($plazo, FILTER_VALIDATE_INT);
+
+    if (
+        $monto === false || $monto < 100 ||
+        $tasa === false || $tasa < 1 ||
+        $plazo === false || $plazo < 1
+    ) {
+        $mensajeError = "El monto debe ser minimo 100, la tasa minimo 1 y el plazo minimo 1.";
+    }
+}
+
+    if (
+    $monto !== false && $monto >= 100 &&
+    $tasa !== false && $tasa >= 1 &&
+    $plazo !== false && $plazo >= 1 &&
+    $mensajeError === ""
+    ) {
         try {
             $calc = new CalculadoraFinanciera((float)$monto, (float)$tasa, (int)$plazo);
             $cuota = $calc->calcularCuotaMensual();
