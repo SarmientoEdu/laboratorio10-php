@@ -46,6 +46,7 @@ class CalculadoraFinanciera {
         return round($cuota, 2);
     }
 
+    
     // 2.e. Sobrecarga dinámica con __call
     public function __call(string $name, array $arguments) {
         if ($name === 'calcularInteresTotal') {
