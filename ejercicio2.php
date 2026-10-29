@@ -25,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // TODO: Sanitizar entradas POST
     $semilla = htmlspecialchars(trim($_POST['cedula_semilla'] ?? '000'));
-    $monto   = filter_var($_POST['monto'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    $tasa    = filter_var($_POST['tasa'] ?? 0, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-    $plazo   = filter_var($_POST['plazo'] ?? 0, FILTER_SANITIZE_NUMBER_INT);
-
+    $monto   = filter_var(trim($_POST['monto'] ?? 0), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    $tasa    = filter_var(trim($_POST['tasa'] ?? 0), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+    $plazo   = filter_var(trim($_POST['plazo'] ?? 0), FILTER_SANITIZE_NUMBER_INT);
+    
     if ($monto > 0 && $tasa > 0 && $plazo > 0) {
         try {
             $calc = new CalculadoraFinanciera((float)$monto, (float)$tasa, (int)$plazo);
