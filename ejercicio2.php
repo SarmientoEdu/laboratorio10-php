@@ -5,9 +5,8 @@
 session_start();
 
 // TODO: Incluir archivos de biblioteca mediante require_once
-require_once 'includes/seguridad.php';
-require_once 'includes/CalculadoraFinanciera.php';
-
+require_once __DIR__ . '/includes/seguridad.php';
+require_once __DIR__ . '/includes/CalculadoraFinanciera.php';
 // TODO: Gestionar Token CSRF
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -19,7 +18,7 @@ $resultadoJSON = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // TODO: Validar Token CSRF enviado
     $tokenEnviado = $_POST['csrf_token'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'], $tokenEnviado)) {
+        if (!is_string($tokenEnviado) || !hash_equals($_SESSION['csrf_token'], $tokenEnviado)) {
         die("Error de validacion CSRF: Token invalido o expirado.");
     }
 

@@ -2,14 +2,19 @@
 /**
  * Ejercicio 3: Procesamiento GET, Tabla de Amortizacion y Cifrado OpenSSL
  */
-require_once 'includes/seguridad.php';
-require_once 'includes/CalculadoraFinanciera.php';
+require_once __DIR__ . '/includes/seguridad.php';
+require_once __DIR__ . '/includes/CalculadoraFinanciera.php';
 
 // TODO: Sanitizar entradas recibidas por GET
-$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
-$monto   = (float)($_GET['monto'] ?? 1000);
-$tasa    = (float)($_GET['tasa'] ?? 12);
-$plazo   = (int)($_GET['plazo'] ?? 12);
+$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'), ENT_QUOTES, 'UTF-8');
+$monto   = filter_var(trim($_GET['monto'] ?? '1000'), FILTER_VALIDATE_FLOAT);
+$tasa    = filter_var(trim($_GET['tasa'] ?? '12'), FILTER_VALIDATE_FLOAT);
+$plazo   = filter_var(trim($_GET['plazo'] ?? '12'), FILTER_VALIDATE_INT);
+
+if ($monto === false || $tasa === false || $plazo === false || $monto <= 0 || $tasa <= 0 || $plazo <= 0) {
+    http_response_code(400);
+    die("Parametros GET invalidos. Ejemplo: ?cedula_semilla=892&monto=5000&tasa=12&plazo=24");
+}
 
 $calc = new CalculadoraFinanciera($monto, $tasa, $plazo);
 $cuota = $calc->calcularCuotaMensual();
