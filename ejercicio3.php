@@ -6,7 +6,7 @@ require_once 'includes/seguridad.php';
 require_once 'includes/CalculadoraFinanciera.php';
 
 // TODO: Sanitizar entradas recibidas por GET
-$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '000'));
+$semilla = htmlspecialchars(trim($_GET['cedula_semilla'] ?? '903'));
 $monto   = (float)($_GET['monto'] ?? 1000);
 $tasa    = (float)($_GET['tasa'] ?? 12);
 $plazo   = (int)($_GET['plazo'] ?? 12);
