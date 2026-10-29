@@ -42,13 +42,14 @@ class CalculadoraFinanciera {
 
     // TODO: Ejercicio 1.5 - Implementar sobrecarga dinamica con __call
     public function __call(string $name, array $arguments) {
-        if ($name === 'calcularInteresTotal') {
-            $plazoEfectivo = isset($arguments[0]) && is_int($arguments[0]) ? $arguments[0] : $this->plazoMeses;
-            $cuota = $this->calcularCuotaMensual();
-            $totalPagado = $cuota * $plazoEfectivo;
-            return round($totalPagado - $this->montoBase, 2);
-        }
-
-        throw new BadMethodCallException("El metodo '$name' no existe en la clase CalculadoraFinanciera.");
+    if ($name === 'calcularInteresTotal') {
+        $mesesExtra = (isset($arguments[0]) && is_int($arguments[0]) && $arguments[0] > 0) ? $arguments[0] : 0;
+        $n = $this->plazoMeses + $mesesExtra;
+        $r = ($this->tasaAnual / 100) / 12;
+        $cuota = $this->montoBase * ($r * pow(1 + $r, $n)) / (pow(1 + $r, $n) - 1);
+        return round($cuota * $n - $this->montoBase, 2);
     }
+
+    throw new BadMethodCallException("El metodo '$name' no existe en la clase CalculadoraFinanciera.");
+}
 }
